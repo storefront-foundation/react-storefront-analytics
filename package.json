@@ -16,11 +16,11 @@
     }
   },
   "scripts": {
-    "release": "yarn version; yarn build; FILE=$(npm pack); curl -F package=@$FILE https://$GEMFURY_PUSH_TOKEN@push.fury.io/moovweb/; git push --tags;",
-    "build": "rm -rf dist && mkdir dist && babel src -d dist --source-maps --copy-files",
+    "release": "npm run build; cd dist; FILE=$(npm pack); curl -F package=@$FILE https://$GEMFURY_PUSH_TOKEN@push.fury.io/moovweb/",
     "test": "jest",
     "watch": "npm-watch",
-    "push-build": "yarn build && yalc push"
+    "push-build": "npm run build && yalc push",
+    "build": "rm -rf dist && mkdir dist && babel src -d dist --source-maps --copy-files"
   },
   "author": "",
   "license": "ISC",
