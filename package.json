@@ -1,6 +1,6 @@
 {
   "name": "react-storefront-analytics",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React Storefront commercial analytics module",
   "main": "dist/index.js",
   "directories": {
