@@ -10,6 +10,14 @@ import AnalyticsProvider from '../src/AnalyticsProvider'
 import { events } from '../src/analytics'
 
 describe('TrackPageView', () => {
+  beforeEach(() => {
+    jest.spyOn(global, 'setTimeout').mockImplementation(setImmediate)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('should fire a pageview event with props on mount', () => {
     const spy = jest.fn()
     events.once('pageview', spy)
