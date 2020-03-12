@@ -49,7 +49,7 @@ const Track = ({ children, event, onSuccess, ...data }) => {
   const { fire } = useAnalytics()
 
   const fireEvent = e => {
-    setImmediate(async () => {
+    setTimeout(async () => {
       // Next adds a 'trigger' prop
       const { trigger, ...rest } = data
       await fire(e, rest)

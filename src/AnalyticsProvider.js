@@ -85,7 +85,7 @@ const AnalyticsProvider = ({ children, delayUntilInteractive }) => {
 
   useEffect(() => {
     // Allow targets to add event listeners before initializing
-    setImmediate(() => {
+    setTimeout(() => {
       initialize(delayUntilInteractive)
     })
   }, [])

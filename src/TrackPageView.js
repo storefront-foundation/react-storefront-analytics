@@ -16,7 +16,7 @@ const TrackPageView = props => {
   }
 
   useEffect(() => {
-    setImmediate(() => {
+    setTimeout(() => {
       fire('pageview', props)
     })
   }, [])

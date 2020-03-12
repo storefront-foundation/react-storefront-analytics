@@ -10,7 +10,16 @@ import { fire, initialize } from '../src/analytics'
 import waitForAnalytics from './helpers/waitForAnalytics'
 
 describe('GoogleAnalytics', () => {
-  beforeEach(() => initialize(false))
+
+  beforeEach(() => {
+    initialize(false)
+    jest.spyOn(global, 'setTimeout').mockImplementation(setImmediate)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('should render with no children', () => {
     mount(
       <AnalyticsProvider>

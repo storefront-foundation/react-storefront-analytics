@@ -9,6 +9,14 @@ import waitForAnalytics from './helpers/waitForAnalytics'
 import AnalyticsProvider from '../src/AnalyticsProvider'
 
 describe('AnalyticsProvider', () => {
+  beforeEach(() => {
+    jest.spyOn(global, 'setTimeout').mockImplementation(setImmediate)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('should call initialize with targets and delayUntilInteractive', () => {
     const spy = jest.spyOn(analytics, 'initialize')
     const delayUntilInteractive = true

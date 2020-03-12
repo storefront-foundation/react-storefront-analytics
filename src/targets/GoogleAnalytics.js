@@ -130,7 +130,7 @@ const GoogleAnalytics = ({
   }
 
   useEffect(() => {
-    setImmediate(() => {
+    setTimeout(() => {
       if (trace) {
         window.ga_debug = { trace }
       }

@@ -10,6 +10,14 @@ import AnalyticsProvider from '../src/AnalyticsProvider'
 import { events } from '../src/analytics'
 
 describe('Track', () => {
+  beforeEach(() => {
+    jest.spyOn(global, 'setTimeout').mockImplementation(setImmediate)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('should support no children', () => {
     expect(
       mount(
