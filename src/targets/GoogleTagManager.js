@@ -74,7 +74,7 @@ const GoogleTagManager = ({
   if (!containerId) return null
 
   useEffect(() => {
-    setImmediate(() => {
+    setTimeout(() => {
       const handlers = children || {}
       Object.keys(handlers).forEach(event => {
         events.on(event, eventParams => {
