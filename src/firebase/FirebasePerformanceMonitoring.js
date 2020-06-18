@@ -1,6 +1,8 @@
-import React, { memo } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import reportPerformanceMetrics from './reportPerformanceMetrics'
+import { Router } from 'next/router'
+import FirebaseContext from './FirebaseContext'
 
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
@@ -16,29 +18,38 @@ if (typeof window !== 'undefined') {
  * 1.) Go to your the Settings icon Project settings in the Firebase console.
  * 2.) In the Your apps card, select the nickname of the app for which you need a config object.
  * 3.) Select Config from the Firebase SDK snippet pane.
- * 4.) Copy the config object value, convert it to JSON, and add it as an environment variable called "FIREBASE_CONFIG".
- * Note that JSON requires all keys and values to be surrounded in double quotes.
+ * 4.) Copy the config object value and add it as an environment variable called "FIREBASE_CONFIG".
  */
-function FirebasePerformanceMonitoring({ firebaseSdkUrl }) {
+export default function FirebasePerformanceMonitoring({
+  firebaseSdkUrl,
+  clientSideNavigationTraceName,
+  children,
+}) {
   let config = process.env.FIREBASE_CONFIG
 
-  if (!config) {
-    return null
-  }
+  const context = useMemo(() => ({ trace: null }), [])
 
-  config = JSON.parse(config)
+  useEffect(() => {
+    Router.events.on('routeChangeStart', () => {
+      context.trace = window.firebasePerf.trace(clientSideNavigationTraceName)
+      context.trace.start() // the trace will be ended by FirebaseNavigationTrace
+    })
+  }, [])
 
-  return (
-    <>
-      <link
-        href="https://firebaselogging.googleapis.com"
-        rel="preconnect"
-        crossOrigin="anonymous"
-      />
-      <script
-        defer
-        dangerouslySetInnerHTML={{
-          __html: `
+  let scripts = null
+
+  if (config) {
+    scripts = (
+      <>
+        <link
+          href="https://firebaselogging.googleapis.com"
+          rel="preconnect"
+          crossOrigin="anonymous"
+        />
+        <script
+          defer
+          dangerouslySetInnerHTML={{
+            __html: `
           (function(sa,fbc){function load(f,c){var a=document.createElement('script');
           a.async=1;a.src=f;var s=document.getElementsByTagName('script')[0];
           s.parentNode.insertBefore(a,s);}load(sa);
@@ -46,14 +57,20 @@ function FirebasePerformanceMonitoring({ firebaseSdkUrl }) {
             window.firebasePerf = firebase.initializeApp(fbc).performance(); 
             __rsfFirebaseSendPerformanceMetrics(window.firebasePerf)
           });
-          })(${JSON.stringify(firebaseSdkUrl)}, ${JSON.stringify(config)});`,
-        }}
-      />
-    </>
+          })(${JSON.stringify(firebaseSdkUrl)}, ${config});`,
+          }}
+        />
+      </>
+    )
+  }
+
+  return (
+    <FirebaseContext.Provider value={context}>
+      {scripts}
+      {children}
+    </FirebaseContext.Provider>
   )
 }
-
-export default memo(FirebasePerformanceMonitoring)
 
 FirebasePerformanceMonitoring.propTypes = {
   /**
@@ -63,6 +80,9 @@ FirebasePerformanceMonitoring.propTypes = {
   /**
    * The name of the custom trace used to capture client side navigation time.
    * Defaults to "client-side-navigation".
+   *
+   * To track client side navigation time, you need to add `<TrackPageView/>` to
+   * each page component in your app.
    */
   clientSideNavigationTraceName: PropTypes.string,
 }

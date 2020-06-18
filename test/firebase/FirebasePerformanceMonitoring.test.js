@@ -1,10 +1,37 @@
-import FirebasePerformanceMonitoring from '../../src/firebase/FirebasePerformanceMonitoring'
 import { mount } from 'enzyme'
 import React from 'react'
+import EventEmitter from 'events'
 
 describe('FirebasePerformanceMonitoring', () => {
+  let FirebasePerformanceMonitoring, events, start
+
   beforeEach(() => {
-    process.env.FIREBASE_CONFIG = JSON.stringify({ foo: 'bar' })
+    jest.isolateModules(() => {
+      process.env.FIREBASE_CONFIG = JSON.stringify({ foo: 'bar' })
+      events = new EventEmitter()
+      start = jest.fn()
+
+      class MockTrace {
+        constructor() {
+          this.start = start
+        }
+      }
+
+      window.firebasePerf = {
+        trace: jest.fn(name => {
+          return new MockTrace()
+        }),
+      }
+
+      jest.doMock('next/router', () => ({
+        Router: {
+          events,
+        },
+      }))
+
+      FirebasePerformanceMonitoring = require('../../src/firebase/FirebasePerformanceMonitoring')
+        .default
+    })
   })
 
   afterEach(() => {
@@ -36,5 +63,11 @@ describe('FirebasePerformanceMonitoring', () => {
         .first()
         .html(),
     ).toContain(url)
+  })
+
+  it('should start a trace on routeChangeStart', () => {
+    const wrapper = mount(<FirebasePerformanceMonitoring />)
+    events.emit('routeChangeStart')
+    expect(start).toHaveBeenCalled()
   })
 })
