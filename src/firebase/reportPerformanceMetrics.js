@@ -12,29 +12,34 @@ import { getCLS, getFID, getLCP, getTTFB, getFCP } from 'web-vitals'
  *
  * @param {Object} firebasePerf The firebase peformance object
  */
-export default async function reportPeformanceMetrics(firebasePerf) {
+export default function reportPeformanceMetrics(firebasePerf) {
+  /* istanbul ignore else */
   if (typeof window.performance !== 'undefined') {
-    const performance = window.performance
+    try {
+      const performance = window.performance
 
-    function reportMetric(name, value) {
-      const trace = firebasePerf.trace(name)
-      trace.start()
-      trace.putMetric(name, value)
-      trace.stop()
+      function reportMetric(name, value) {
+        const trace = firebasePerf.trace(name)
+        trace.start()
+        trace.putMetric(name, value)
+        trace.stop()
+      }
+
+      // Server-Timing header
+      for (let metric of performance.getEntriesByType('navigation')[0].serverTiming) {
+        reportMetric(metric.name, metric.duration)
+      }
+
+      const metrics = [getCLS, getFID, getLCP, getTTFB, getFCP]
+
+      metrics.forEach(getMetric => {
+        getMetric(
+          metric => reportMetric(metric.name, metric.value),
+          true /* report each measurement, not just the first */,
+        )
+      })
+    } catch (e) {
+      console.warn('Could not get performance metrics', e)
     }
-
-    // Server-Timing header
-    for (let metric of performance.getEntriesByType('navigation')[0].serverTiming) {
-      reportMetric(metric.name, metric.duration)
-    }
-
-    const metrics = [getCLS, getFID, getLCP, getTTFB, getFCP]
-
-    metrics.forEach(getMetric => {
-      getMetric(
-        metric => reportMetric(metric.name, metric.value),
-        true /* report each measurement, not just the first */,
-      )
-    })
   }
 }
