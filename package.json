@@ -25,7 +25,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tti-polyfill": "^0.2.2"
+    "tti-polyfill": "^0.2.2",
+    "web-vitals": "^0.2.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.7",
