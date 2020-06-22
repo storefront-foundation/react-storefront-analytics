@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import reportPerformanceMetrics from './reportPerformanceMetrics'
 import { Router } from 'next/router'
 import FirebaseContext from './FirebaseContext'
+import { useAmp } from 'next/amp'
 
 /* istanbul ignore else */
 if (typeof window !== 'undefined') {
@@ -38,7 +39,7 @@ export default function FirebasePerformanceMonitoring({
 
   let scripts = null
 
-  if (config) {
+  if (config && !useAmp()) {
     scripts = (
       <>
         <link
