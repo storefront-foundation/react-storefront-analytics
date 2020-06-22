@@ -3,11 +3,11 @@ import React from 'react'
 import EventEmitter from 'events'
 
 describe('FirebasePerformanceMonitoring', () => {
-  let FirebasePerformanceMonitoring, events, start
+  let FirebasePerformanceMonitoring, events, start, config
 
   beforeEach(() => {
     jest.isolateModules(() => {
-      process.env.FIREBASE_CONFIG = JSON.stringify({ foo: 'bar' })
+      config = { foo: 'bar' }
       events = new EventEmitter()
       start = jest.fn()
 
@@ -34,29 +34,24 @@ describe('FirebasePerformanceMonitoring', () => {
     })
   })
 
-  afterEach(() => {
-    delete process.env.FIREBASE_CONFIG
-  })
-
   it('should use the config from the FIREBASE_CONFIG environment variable', () => {
-    const wrapper = mount(<FirebasePerformanceMonitoring />)
+    const wrapper = mount(<FirebasePerformanceMonitoring config={config} />)
     expect(
       wrapper
         .find('script')
         .first()
         .html(),
-    ).toContain(process.env.FIREBASE_CONFIG)
+    ).toContain(JSON.stringify(config))
   })
 
   it('should render nothing if FIREBASE_CONFIG is not provided', () => {
-    delete process.env.FIREBASE_CONFIG
     const wrapper = mount(<FirebasePerformanceMonitoring />)
     expect(wrapper.find('script')).toHaveLength(0)
   })
 
   it('should use the provided sdk url', () => {
     const url = 'http://firebase.com/test'
-    const wrapper = mount(<FirebasePerformanceMonitoring firebaseSdkUrl={url} />)
+    const wrapper = mount(<FirebasePerformanceMonitoring config={config} firebaseSdkUrl={url} />)
     expect(
       wrapper
         .find('script')
@@ -66,7 +61,7 @@ describe('FirebasePerformanceMonitoring', () => {
   })
 
   it('should start a trace on routeChangeStart', () => {
-    const wrapper = mount(<FirebasePerformanceMonitoring />)
+    const wrapper = mount(<FirebasePerformanceMonitoring config={config} />)
     events.emit('routeChangeStart')
     expect(start).toHaveBeenCalled()
   })
