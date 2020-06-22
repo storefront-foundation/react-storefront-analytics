@@ -12,29 +12,29 @@ if (typeof window !== 'undefined') {
 /**
  * Reports RUM metrics to Firebase Performance Monitoring.
  *
- * Your firebase config object must be provided as an environment variable called "FIREBASE_CONFIG".
- * To get your firebase config object:
+ * Your firebase config object must be provided as the `config` prop. To get your firebase config object:
  *
  * 1.) Go to your the Settings icon Project settings in the Firebase console.
  * 2.) In the Your apps card, select the nickname of the app for which you need a config object.
  * 3.) Select Config from the Firebase SDK snippet pane.
- * 4.) Copy the config object value and add it as an environment variable called "FIREBASE_CONFIG".
+ * 4.) Provide the config object using the `config` prop on this component.
  */
 export default function FirebasePerformanceMonitoring({
+  config,
   firebaseSdkUrl,
   clientSideNavigationTraceName,
   children,
 }) {
-  let config = process.env.FIREBASE_CONFIG
-
   const context = useMemo(() => ({ trace: null }), [])
 
   useEffect(() => {
-    Router.events.on('routeChangeStart', () => {
-      context.trace = window.firebasePerf.trace(clientSideNavigationTraceName)
-      context.trace.start() // the trace will be ended by FirebaseNavigationTrace
-    })
-  }, [])
+    if (config) {
+      Router.events.on('routeChangeStart', () => {
+        context.trace = window.firebasePerf.trace(clientSideNavigationTraceName)
+        context.trace.start() // the trace will be ended by FirebaseNavigationTrace
+      })
+    }
+  }, [config])
 
   let scripts = null
 
@@ -57,7 +57,7 @@ export default function FirebasePerformanceMonitoring({
             window.firebasePerf = firebase.initializeApp(fbc).performance(); 
             __rsfFirebaseSendPerformanceMetrics(window.firebasePerf)
           });
-          })(${JSON.stringify(firebaseSdkUrl)}, ${config});`,
+          })(${JSON.stringify(firebaseSdkUrl)}, ${JSON.stringify(config)});`,
           }}
         />
       </>
@@ -73,6 +73,11 @@ export default function FirebasePerformanceMonitoring({
 }
 
 FirebasePerformanceMonitoring.propTypes = {
+  /**
+   * Your firebase config.  You can get this from the Firebase console at
+   * Settings => General => Your Apps => Firebase SDK Snippet => Config
+   */
+  config: PropTypes.object.isRequired,
   /**
    * The CDN URL for the standalone firebase SDK
    */
