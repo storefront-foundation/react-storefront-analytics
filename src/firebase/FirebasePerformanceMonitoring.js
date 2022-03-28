@@ -31,8 +31,12 @@ export default function FirebasePerformanceMonitoring({
   useEffect(() => {
     if (config) {
       Router.events.on('routeChangeStart', () => {
-        context.trace = window.firebasePerf.trace(clientSideNavigationTraceName)
-        context.trace.start() // the trace will be ended by FirebaseNavigationTrace
+        if (window.firebasePerf) {
+          // It's possible for Firebase to be blocked by browser extensinos such as uBlock Origin,
+          // so we check to make sure it's defined first.
+          context.trace = window.firebasePerf.trace(clientSideNavigationTraceName)
+          context.trace.start() // the trace will be ended by FirebaseNavigationTrace
+        }
       })
     }
   }, [config])
@@ -55,8 +59,10 @@ export default function FirebasePerformanceMonitoring({
           a.async=1;a.src=f;var s=document.getElementsByTagName('script')[0];
           s.parentNode.insertBefore(a,s);}load(sa);
           window.addEventListener('load',function(){ 
-            window.firebasePerf = firebase.initializeApp(fbc).performance(); 
-            __rsfFirebaseSendPerformanceMetrics(window.firebasePerf)
+            if (window.firebase) {
+              window.firebasePerf = firebase.initializeApp(fbc).performance(); 
+              __rsfFirebaseSendPerformanceMetrics(window.firebasePerf)
+            }
           });
           })(${JSON.stringify(firebaseSdkUrl)}, ${JSON.stringify(config)});`,
           }}
